@@ -25,7 +25,7 @@ int main(void)
 	setbuf(stdout, NULL);			/* Unbuffered */
 	setbuf(stdin, NULL);
 
-	while (1) 
+	while (1)
 	{
 		fprintf(stderr, "%s", "msh> ");	/* Prompt */
 		ret = obtain_order(&argvv, filev, &bg);
@@ -40,7 +40,7 @@ int main(void)
  * argvv AND filev. THESE LINES MUST BE REMOVED.
  */
 
-		for (command_counter = 0; command_counter < num_commands; command_counter++) 
+		for (command_counter = 0; command_counter < num_commands; command_counter++)
 		{
 			for (args_counter = 0; (argvv[command_counter][args_counter] != NULL); args_counter++)
 			{
@@ -48,22 +48,21 @@ int main(void)
 			}
 			printf("\n");
 		}
-	
+
 		if (filev[0] != NULL) printf("< %s\n", filev[0]);/* IN */
 
 		if (filev[1] != NULL) printf("> %s\n", filev[1]);/* OUT */
-	
+
 		if (filev[2] != NULL) printf(">& %s\n", filev[2]);/* ERR */
-	
+
 		if (bg) printf("&\n");
 
 /*
  * END OF THE PART TO BE REMOVED
  */
-	
-	} //fin while 
+
+	} //fin while
 
 	return 0;
 
 } //end main
-
