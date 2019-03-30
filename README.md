@@ -4,7 +4,8 @@
 * Implement the functionalities of the commands available for the minishell.
   * [OK!] Simple commands.
   * [OK!] Simple commands in background.
-  * [] Simple commands with redirection.
+  * [~] Simple commands with redirection.
+    * Check that stuff like this works: `echo "text" > text.txt`
   * [···] Sequences of commands connected through pipes (**MAX 3 but if implemented for an unlimited amount, extra points**).
   * [···] Combination of all cases above.
   * [···] Internal commands. These are commands that map directly to a system call or a command internally implemented inside the shell. They are:
