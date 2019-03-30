@@ -1,21 +1,11 @@
-/*-
- * msh.c
- *
- * Minishell C source
- * Show how to use "obtain_order" input interface function
- *
- * THIS FILE IS TO BE MODIFIED
- */
-
-/* TO DO:
-* - Errors
-*
-*/
 
 #include <stddef.h>			/* NULL */
 #include <stdio.h>			/* setbuf, printf */
 #include <unistd.h>
 #include <sys/wait.h>
+
+#define TRUE 1
+#define FALSE 0
 
 extern int obtain_order();		/* See parser.y for description */
 
@@ -40,19 +30,24 @@ int main(void)
 	setbuf(stdout, NULL);			/* Unbuffered */
 	setbuf(stdin, NULL);
 
+	// remember -1 gets "any" terminated child.
+	pid_t pid;
+
 	while (1)
 	{
+		// Handling of background zombie processes.
+		pid = waitpid(-1, &status, WNOHANG);
+		if (pid > 0){
+			printf("BG process has been reaped. [PID: %d]", pid);
+		}
+
+
 		fprintf(stderr, "%s", "msh> ");	/* Prompt */
 		ret = obtain_order(&argvv, filev, &bg);
 		if (ret == 0) break;		/* EOF */
 		if (ret == -1) continue;	/* Syntax error */
 		num_commands = ret - 1;
 		if (num_commands == 0) continue;	/* Empty line */
-
-		// Create an array of process id's that host each process (each command)
-		// This is done in order to track the process id's -> In preparation for
-		// BACKGROUND commands implementation.
-		pid_t pid[num_commands];
 
 		// Iterates over the introduced commands in the argv structure.
 		for (command_counter = 0; command_counter < num_commands; command_counter++){
@@ -65,12 +60,16 @@ int main(void)
 			// We call a fork() and save the id of the child in our array of process ids.
 			// Then we procceed to morph the child into the desired process and wait for it
 			// to finish on the parent process.
-			if ((pid[command_counter] = fork()) == 0){
+			if ((pid = fork()) == 0){
+				if (bg == TRUE){
+					printf("[%d]\n", pid);
+				}
 				execvp(argvv[command_counter][0], argvv[command_counter]);
 			} else {
-				wait(NULL);
+				if (bg == FALSE){
+					wait(NULL);
+				}
 			}
-
 			printf("\n");
 		}
 

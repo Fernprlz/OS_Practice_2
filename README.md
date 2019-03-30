@@ -24,10 +24,16 @@
 * Foreground mode:
   * Minishell cannot have zombie processes of previous background commands. *Which means...?*
 
-#### Class' Comments
+#### Class' Comments 1
 * Consider the use of data structures and state it on the report.
 * Demonstrate that you know what you're doing.
 * Be careful with comment coverage
 * Think of the potential values inside the files, and its features that could make the program subject of errors: size of the file, permissions, values, etc.
 * Be careful with the child process retrieval to avoid zombies. Don't only wait for one because you'll end up having zombies.
 * Care about redirections because they are hard to debug.
+#### Class' Comments 2
+* Do not kill your own children.
+* Test cases:
+  * run short command in background -> run long command in background -> run command in foreground.
+  * Check the preconditions - the procedure - and the test entries. // state before and after.
+  * Group commands by families (need input or not, create outputs or not, and so on...).
