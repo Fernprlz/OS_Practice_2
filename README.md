@@ -3,9 +3,8 @@
 * Modify the code inside the while loop of the shell code so that it interprets the commands and performs their operations.
 * Implement the functionalities of the commands available for the minishell.
   * [OK!] Simple commands.
-  * [···] Simple commands in background.
-    * Implement a handler or check how SIGNAL() works.
-  * [···] Simple commands with redirection.
+  * [OK!] Simple commands in background.
+  * [] Simple commands with redirection.
   * [···] Sequences of commands connected through pipes (**MAX 3 but if implemented for an unlimited amount, extra points**).
   * [···] Combination of all cases above.
   * [···] Internal commands. These are commands that map directly to a system call or a command internally implemented inside the shell. They are:
@@ -24,6 +23,11 @@
   * The minishell may show the prompt mixed with the ouput of the process child. **This is correct behaviour**.
 * Foreground mode:
   * Minishell cannot have zombie processes of previous background commands. *Which means...?*
+
+* SIGCHILD has three conventional uses, indicate:
+  * Termination of a child.
+  * Stopping of a child.
+  * A child is resumed.
 
 #### Class' Comments 1
 * Consider the use of data structures and state it on the report.
