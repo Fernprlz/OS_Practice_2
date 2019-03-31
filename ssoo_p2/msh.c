@@ -35,7 +35,7 @@
 		// Redirect the OUTPUT.
 		if (filev[1] != NULL){
 			close(STDOUT_FILENO);
-			int fd = open(filev[1], O_CREAT | O_TRUNC | O_RDWR, 0666);
+			open(filev[1], O_CREAT | O_TRUNC | O_RDWR, 0666);
 		}
 		// Redirect the ERROR.
 		if (filev[2] != NULL){
@@ -71,10 +71,9 @@
 		return 1;
 	}
 
-	int redirExec(char ***argvv, char *filev, int command_counter, int num_commands, int bg, int pipe1[], int pipe2[]){
-
+	int redirExec(char ***argvv, char *filev[], int command_counter, int num_commands, int bg, int pipe1[], int pipe2[]){
+		printf("I'm here!!!\n");
 		pid_t pid;
-
 		if ((pid = fork()) == 0){
 
 			if (command_counter == 0){
@@ -86,7 +85,7 @@
 				// Input of the process is read from the output of the pipe.
 				dup(pipe2[0]);
 			} else {
-				close(STDIN_FILENO);
+				close (STDIN_FILENO);
 				close (STDOUT_FILENO);
 				// Input of the process is read from the output of the previous pipe.
 				dup(pipe1[0]);
@@ -108,7 +107,7 @@
 	}
 
 
-	int myTimeExec(char ***argvv, char *filev, int command_counter, int bg){
+	int myTimeExec(char ***argvv, char *filev[], int command_counter, int bg){
 		shiftArgArray(argvv);
 
 		struct timespec timeStart;
