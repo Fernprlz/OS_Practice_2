@@ -50,15 +50,10 @@
 		return 1;
 	}
 
-	int shiftArgArray(char ***argvv, int command_counter){
-		/**for(int ii = 0; argvv[command_counter][ii + 1] != NULL; ii++){
-			argvv[command_counter][ii] = argvv[command_counter][ii + 1];
-		}*/
-		char *arguments[];
-		for(int ii = 0; argvv[command_counter][ii + 1] != NULL; ii++){
-
+	int shiftArgArray(char ***argvv){
+		for(int ii = 0; argvv[0][ii + 1] != NULL; ++ii){
+			argvv[0][ii] = argvv[0][ii + 1];
 		}
-
 		return 1;
 	}
 
@@ -79,7 +74,7 @@
 
 	int myTimeExec(char ***argvv, char *filev, int command_counter, int bg){
 
-		shiftArgArray(argvv, command_counter);
+		shiftArgArray(argvv);
 
 		struct timespec timeStart;
 		clock_gettime(CLOCK_MONOTONIC, &timeStart);
@@ -149,7 +144,7 @@
 					normalExec(argvv, filev, command_counter, bg);
 				}
 				// -·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·- //
-				
+
 			} // End of Command Handling.
 
 		} // End of Shell Input Prompt.

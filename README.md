@@ -4,7 +4,7 @@
 * Implement the functionalities of the commands available for the minishell.
   * [OK!] Simple commands.
   * [OK!] Simple commands in background.
-  * [~] Simple commands with redirection.
+  * [OK!] Simple commands with redirection.
     * Check that stuff like this works: `echo "text" > text.txt`
   * [···] Sequences of commands connected through pipes (**MAX 3 but if implemented for an unlimited amount, extra points**).
   * [···] Combination of all cases above.
