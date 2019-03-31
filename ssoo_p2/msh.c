@@ -9,10 +9,12 @@
 	#include <signal.h>			/* signal handling */
 	#include <errno.h>			/* system error number */
 
+	#include <string.h>
 	#include <time.h>
 
 	#define TRUE 1
 	#define FALSE 0
+	#define BILLION 1E9
 
 	extern int obtain_order();		/* See parser.y for description */
 
@@ -45,6 +47,52 @@
 			dup(fd);
 			close(fd);
 		}
+		return 1;
+	}
+
+	int shiftArgArray(char ***argvv, int command_counter){
+		/**for(int ii = 0; argvv[command_counter][ii + 1] != NULL; ii++){
+			argvv[command_counter][ii] = argvv[command_counter][ii + 1];
+		}*/
+		char *arguments[];
+		for(int ii = 0; argvv[command_counter][ii + 1] != NULL; ii++){
+
+		}
+
+		return 1;
+	}
+
+	int normalExec(char ***argvv, char *filev, int command_counter, int bg){
+		pid_t pid;
+		if ((pid = fork()) == 0){
+			checkRedirections(filev);
+			execvp(argvv[command_counter][0], argvv[command_counter]);
+		} else {
+			if (bg == FALSE){
+				wait(NULL);
+			} else {
+				printf("[%d]\n", getpid());
+			}
+		}
+		return 1;
+	}
+
+	int myTimeExec(char ***argvv, char *filev, int command_counter, int bg){
+
+		shiftArgArray(argvv, command_counter);
+
+		struct timespec timeStart;
+		clock_gettime(CLOCK_MONOTONIC, &timeStart);
+		printf("Startime: %d\n", timeStart);
+
+		normalExec(argvv, filev, command_counter, bg);
+
+		struct timespec timeEnd;
+		clock_gettime(CLOCK_MONOTONIC, &timeEnd);
+		printf("Endtime: %d\n", timeEnd);
+		double timeTaken = (double)(timeEnd.tv_sec-timeStart.tv_sec) + (timeEnd.tv_nsec-timeStart.tv_nsec) / BILLION;
+		printf("Time spent: %f secs.\n", timeTaken);
+
 		return 1;
 	}
 
@@ -93,20 +141,15 @@
 				printf("\n");
 				// -·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·- //
 
-				// A child is created and morphed into the desired process. If foreground,
-				// parent process is blocked until child is reaped.
-				pid_t pid;
-				printf("Startime: %ld\n", start);
-				if ((pid = fork()) == 0){
-					checkRedirections(filev);
-					execvp(argvv[command_counter][0], argvv[command_counter]);
+
+				// -·--·-·-·-·-·-·- Child Creation and Transformation -·-·-·-·-·-·-·- //
+				if (strcmp(argvv[command_counter][0], "mytime") == 0) {
+					myTimeExec(argvv, filev, command_counter, bg);
 				} else {
-					if (bg == FALSE){
-						wait(NULL);
-					} else {
-						printf("[%d]\n", getpid());
-					}
+					normalExec(argvv, filev, command_counter, bg);
 				}
+				// -·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·- //
+				
 			} // End of Command Handling.
 
 		} // End of Shell Input Prompt.
