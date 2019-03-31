@@ -1,0 +1,17 @@
+a.txt
+corrector_ssoo_p2-v2.sh
+Makefile
+msh
+msh.c
+msh.o
+parser.o
+parser.y
+scanner.l
+scanner.o
+shit.tx
+shit.txt
+t.txt
+unzip_script.sh
+y.c
+y.o
+y.tab.h

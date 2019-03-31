@@ -29,24 +29,18 @@
 	int checkRedirections(char *filev[]){
 		// Redirect the INPUT.
 		if (filev[0] != NULL){
-			int fd = open(filev[0], O_RDONLY);
 			close(STDIN_FILENO);
-			dup(fd);
-			close(fd);
+			open(filev[0], O_RDONLY);
 		}
 		// Redirect the OUTPUT.
 		if (filev[1] != NULL){
-			int fd = open(filev[0], O_WRONLY);
 			close(STDOUT_FILENO);
-			dup(fd);
-			close(fd);
+			int fd = open(filev[1], O_CREAT | O_TRUNC | O_RDWR, 0666);
 		}
 		// Redirect the ERROR.
 		if (filev[2] != NULL){
-			int fd = open(filev[0], O_RDWR);
 			close(STDERR_FILENO);
-			dup(fd);
-			close(fd);
+			open(filev[2], O_CREAT | O_TRUNC | O_WRONLY, 0666);
 		}
 		return 1;
 	}
@@ -60,11 +54,13 @@
 		return 1;
 	}
 
-	int normalExec(char ***argvv, char *filev, int command_counter, int bg){
+	int normalExec(char ***argvv, char *filev[], int command_counter, int bg){
 		pid_t pid;
 		if ((pid = fork()) == 0){
 			checkRedirections(filev);
-			execvp(argvv[command_counter][0], argvv[command_counter]);
+			if ((execvp(argvv[command_counter][0], argvv[command_counter])) == -1){
+				fprintf(stderr, "Unknown command: %s\n", argvv[command_counter][0]);
+			}
 		} else {
 			if (bg == FALSE){
 				wait(NULL);
@@ -75,22 +71,59 @@
 		return 1;
 	}
 
-	int myTimeExec(char ***argvv, char *filev, int command_counter, int bg){
+	int redirExec(char ***argvv, char *filev, int command_counter, int num_commands, int bg, int pipe1[], int pipe2[]){
 
+		pid_t pid;
+
+		if ((pid = fork()) == 0){
+
+			if (command_counter == 0){
+				close(STDOUT_FILENO);
+				// Output of the process goes to the input of the pipe.
+				dup(pipe1[1]);
+			} else if (command_counter == (num_commands - 1)){
+				close(STDIN_FILENO);
+				// Input of the process is read from the output of the pipe.
+				dup(pipe2[0]);
+			} else {
+				close(STDIN_FILENO);
+				close (STDOUT_FILENO);
+				// Input of the process is read from the output of the previous pipe.
+				dup(pipe1[0]);
+				// Output of the process goes into the input of the "current" pipe.
+				dup(pipe2[1]);
+			}
+
+			checkRedirections(filev);
+			execvp(argvv[command_counter][0], argvv[command_counter]);
+		} else {
+			if (bg == FALSE){
+				wait(NULL);
+			} else {
+				printf("[%d]\n", getpid());
+			}
+		}
+
+		return 1;
+	}
+
+
+	int myTimeExec(char ***argvv, char *filev, int command_counter, int bg){
 		shiftArgArray(argvv);
 
 		struct timespec timeStart;
 		clock_gettime(CLOCK_MONOTONIC, &timeStart);
-		printf("Startime: %d\n", timeStart);
 
 		normalExec(argvv, filev, command_counter, bg);
 
 		struct timespec timeEnd;
 		clock_gettime(CLOCK_MONOTONIC, &timeEnd);
-		printf("Endtime: %d\n", timeEnd);
 		double timeTaken = (double)(timeEnd.tv_sec-timeStart.tv_sec) + (timeEnd.tv_nsec-timeStart.tv_nsec) / BILLION;
+		if (timeTaken < 0){
+			fprintf(stderr, "Usage: mytime <command<args>>\n");
+		} else {
 		printf("Time spent: %f secs.\n", timeTaken);
-
+	}
 		return 1;
 	}
 
@@ -135,12 +168,19 @@
 			if (num_commands == 0) continue;	/* Empty line */
 			////////////////////////////////////////////
 
+
+			int pipe1[2];
+			int pipe2[2];
+			if (num_commands > 1) {
+				pipe(pipe1);
+				pipe(pipe2);
+			}
+
+
 			//////// Command Handling //////////////////
 			for (command_counter = 0; command_counter < num_commands; command_counter++){
-				//Prints a prompt of the command to execute and its arguments:
-				for (args_counter = 0; (argvv[command_counter][args_counter] != NULL); args_counter++){
-					printf("%s ", argvv[command_counter][args_counter]);
-				}
+				// Counts the number of arguments for the current command.
+				for (args_counter = 0; (argvv[command_counter][args_counter] != NULL); args_counter++);
 
 				// -·-·-·- Print Symbols for Redirection or Background execution -·-·-·-//
 				if (bg == TRUE) printf("&\n");
@@ -155,10 +195,14 @@
 				if (strcmp(argvv[command_counter][0], "mypwd") == 0) {
 					mygetcwd();
 				}
-				if (strcmp(argvv[command_counter][0], "mytime") == 0) {
+				else if (strcmp(argvv[command_counter][0], "mytime") == 0) {
 					myTimeExec(argvv, filev, command_counter, bg);
 				} else {
-					normalExec(argvv, filev, command_counter, bg);
+					if (num_commands > 1){
+						redirExec(argvv, filev, command_counter, num_commands, bg, pipe1, pipe2);
+					} else {
+						normalExec(argvv, filev, command_counter, bg);
+					}
 				}
 				// -·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·- //
 
