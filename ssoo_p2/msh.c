@@ -11,6 +11,7 @@
 
 	#include <string.h>
 	#include <time.h>
+	#include <limits.h>
 
 	#define TRUE 1
 	#define FALSE 0
@@ -51,9 +52,11 @@
 	}
 
 	int shiftArgArray(char ***argvv){
-		for(int ii = 0; argvv[0][ii + 1] != NULL; ++ii){
+		int ii;
+		for(ii = 0; argvv[0][ii + 1] != NULL; ++ii){
 			argvv[0][ii] = argvv[0][ii + 1];
 		}
+		argvv[0][ii] = NULL;
 		return 1;
 	}
 
@@ -88,6 +91,17 @@
 		double timeTaken = (double)(timeEnd.tv_sec-timeStart.tv_sec) + (timeEnd.tv_nsec-timeStart.tv_nsec) / BILLION;
 		printf("Time spent: %f secs.\n", timeTaken);
 
+		return 1;
+	}
+
+	int mygetcwd(){
+		char cwd[PATH_MAX];
+		if(getcwd(cwd, sizeof(cwd)) != NULL) {
+			printf ("Current working dir: %s\n", cwd);
+		} else {
+			printf ("Mypwd error");
+			return 0;
+		}
 		return 1;
 	}
 
@@ -138,6 +152,9 @@
 
 
 				// -·--·-·-·-·-·-·- Child Creation and Transformation -·-·-·-·-·-·-·- //
+				if (strcmp(argvv[command_counter][0], "mypwd") == 0) {
+					mygetcwd();
+				}
 				if (strcmp(argvv[command_counter][0], "mytime") == 0) {
 					myTimeExec(argvv, filev, command_counter, bg);
 				} else {
